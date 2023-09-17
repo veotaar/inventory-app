@@ -1,0 +1,13 @@
+extends layout
+
+block content
+  h1 Item: #{title}
+
+  p #[strong Description:] #{item.description}
+  p #[strong Price:] #{item.price}$
+  p #[strong In stock:] #{item.number_in_stock}
+  p #[strong Category:]
+    each val, index in item.category
+      a(href=val.url) #{val.name}
+      if index < item.category.length - 1
+        |,
