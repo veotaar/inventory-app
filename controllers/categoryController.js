@@ -12,7 +12,7 @@ exports.category_list = asyncHandler(async (req, res, next) => {
 });
 
 exports.category_create_get = asyncHandler(async (req, res, next) => {
-  res.send('NOT IMPLEMENTED: category create get');
+  res.render('category_form',{title: 'Create Category'});
 });
 
 exports.category_create_post = asyncHandler(async (req, res, next) => {
