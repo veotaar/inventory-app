@@ -1,0 +1,31 @@
+extends layout
+
+block content
+  h1= title
+
+  form(method='POST' action='')
+    div
+      label(for='name') Item name:
+      input#name(type='text', placeholder='Name of item' name='name' required='true' value=(undefined===item ? '' : item.name) )
+    div
+      label(for='description') Description:
+      textarea#description(type='textarea', placeholder='description' name='description' required='true') #{undefined===item ? '' : item.description}
+    div
+      label(for='price') Price:
+      input#price(type='number', placeholder='10' name='price' value=(undefined===item ? '' : item.price) required='true')
+    div
+      label(for='stock') Stock:
+      input#stock(type='number', placeholder='10' name='stock' value=(undefined===item ? '' : item.number_in_stock) required='true')
+    div
+      label Category:
+      div
+        for category in categories
+          div
+            input(type='checkbox', name='category', id=category._id, value=category._id, checked=category.checked )
+            label(for=category._id) #{category.name}
+    button(type='submit') Submit
+
+  if errors
+    ul
+      for error in errors
+        li!= error.msg
