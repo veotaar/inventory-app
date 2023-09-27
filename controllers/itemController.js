@@ -2,6 +2,7 @@ const Item = require('../models/item');
 const Category = require('../models/category');
 
 const asyncHandler = require('express-async-handler');
+const { body, validationResult } = require('express-validator');
 
 exports.index = asyncHandler(async (req, res, next) => {
   // get item and category counts
@@ -30,9 +31,81 @@ exports.item_create_get = asyncHandler(async (req, res, next) => {
 
 });
 
-exports.item_create_post = asyncHandler(async (req, res, next) => {
-  res.send('NOT IMPLEMENTED: item create post');
-});
+exports.item_create_post = [
+  // Convert the category to an array.
+  (req, res, next) => {
+    if (!(req.body.category instanceof Array)) {
+      if (typeof req.body.category === 'undefined') req.body.category = [];
+      else req.body.category = new Array(req.body.category);
+    }
+    next();
+  },
+
+  // Validate and sanitize the name field.
+  body('name', 'Item name must contain at least 3 characters')
+    .trim()
+    .isLength({ min: 3 })
+    .escape(),
+
+  body('description', 'Description must contain at least 3 characters')
+    .trim()
+    .isLength({ min: 3 })
+    .escape(),
+
+  body('price', 'Description must contain at least 1 character')
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+
+  body('stock', 'Description must contain at least 1 character')
+    .trim()
+    .isLength({ min: 1 })
+    .escape(),
+
+  body('category.*').escape(),
+
+  // Process request after validation and sanitization.
+  asyncHandler(async (req, res, next) => {
+    // Extract the validation errors from a request.
+    const errors = validationResult(req);
+
+    // Create a category object with escaped and trimmed data.
+    const item = new Item({
+      name: req.body.name,
+      description: req.body.description,
+      price: req.body.price,
+      number_in_stock: req.body.stock,
+      category: req.body.category
+    });
+
+    if (!errors.isEmpty()) {
+      // There are errors. Render the form again with sanitized values/error messages.
+
+      // get all categories for form
+      const allCategories = await Category.find().exec();
+
+      // mark selected categories as checked
+
+      for (const category of allCategories) {
+        if(item.category.includes(category._id)) {
+          category.checked = 'true';
+        }
+      }
+
+      res.render('item_form', {
+        title: 'Create Item',
+        item: item,
+        categories: allCategories,
+        errors: errors.array(),
+      });
+      // return;
+    } else {
+      // Data from form is valid. Save item
+      await item.save();
+      res.redirect(item.url);
+    }
+  }),
+];
 
 exports.item_delete_get = asyncHandler(async (req, res, next) => {
   res.send('NOT IMPLEMENTED: item delete get');
